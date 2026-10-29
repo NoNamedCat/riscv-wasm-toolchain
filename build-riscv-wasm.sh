@@ -9,6 +9,8 @@
 #   - riscv-as.js / riscv-as.wasm (GNU Assembler)
 #   - riscv-ld.js / riscv-ld.wasm (GNU Linker)
 #   - riscv-objcopy.js / riscv-objcopy.wasm (Objcopy: ELF to HEX/BIN)
+#   - riscv-objdump.js / riscv-objdump.wasm (Disassembler / ELF inspector)
+#   - riscv-size.js / riscv-size.wasm (ELF section size profiler)
 #   - sysroot/ (Headers, libc.a, libm.a, libgcc.a, crt0.o, link.ld)
 # ==============================================================================
 
@@ -201,11 +203,13 @@ if [ ! -f Makefile ]; then
 fi
 
 emmake make -O -j"$JOBS" "CFLAGS=$HOST_FLAGS"
-rm -f gas/as-new ld/ld-new binutils/objcopy
+rm -f gas/as-new ld/ld-new binutils/objcopy binutils/objdump binutils/size
 SINGLE_FLAGS="-sMODULARIZE=1 -sEXPORT_NAME=createModule -sFORCE_FILESYSTEM=1 -sEXPORTED_RUNTIME_METHODS=FS,callMain -sALLOW_MEMORY_GROWTH=1 -sUSE_ZLIB=1"
 emmake make -O -j"$JOBS" -C gas "CFLAGS=$HOST_FLAGS" "LDFLAGS=$SINGLE_FLAGS" as-new
 emmake make -O -j"$JOBS" -C ld "CFLAGS=$HOST_FLAGS" "LDFLAGS=$SINGLE_FLAGS" ld-new
 emmake make -O -j"$JOBS" -C binutils "CFLAGS=$HOST_FLAGS" "LDFLAGS=$SINGLE_FLAGS" objcopy
+emmake make -O -j"$JOBS" -C binutils "CFLAGS=$HOST_FLAGS" "LDFLAGS=$SINGLE_FLAGS" objdump
+emmake make -O -j"$JOBS" -C binutils "CFLAGS=$HOST_FLAGS" "LDFLAGS=$SINGLE_FLAGS" size
 
 install -D gas/as-new "$DIST_DIR/riscv-as.js"
 install -D gas/as-new.wasm "$DIST_DIR/riscv-as.wasm" 2>/dev/null || true
@@ -213,6 +217,10 @@ install -D ld/ld-new "$DIST_DIR/riscv-ld.js"
 install -D ld/ld-new.wasm "$DIST_DIR/riscv-ld.wasm" 2>/dev/null || true
 install -D binutils/objcopy "$DIST_DIR/riscv-objcopy.js"
 install -D binutils/objcopy.wasm "$DIST_DIR/riscv-objcopy.wasm" 2>/dev/null || true
+install -D binutils/objdump "$DIST_DIR/riscv-objdump.js"
+install -D binutils/objdump.wasm "$DIST_DIR/riscv-objdump.wasm" 2>/dev/null || true
+install -D binutils/size "$DIST_DIR/riscv-size.js"
+install -D binutils/size.wasm "$DIST_DIR/riscv-size.wasm" 2>/dev/null || true
 cd "$BUILD_DIR"
 
 # 7. Package the Sysroot (Headers, Libraries, Linker Scripts)
