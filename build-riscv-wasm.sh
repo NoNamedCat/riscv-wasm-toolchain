@@ -173,7 +173,7 @@ for d in gmp mpfr mpc; do rm -f "$SRC_GCC/$d"; done
 echo "--- Compiling GCC (cc1, cc1plus) to WebAssembly ---"
 mkdir -p wasm-gcc && cd wasm-gcc
 if [ ! -f Makefile ]; then
-  emconfigure "$SRC_GCC/configure" --build="$BUILD_GUESS" --host=wasm32 --target="$TARGET" --prefix="$BUILD_DIR/opt/riscv-wasm" \
+  emconfigure "$SRC_GCC/configure" --build="$BUILD_GUESS" --host=wasm32 --target="$TARGET" --prefix=/opt/riscv-wasm \
     --enable-languages=c,c++ --with-gmp="$OPT_WASMDEPS" --with-mpfr="$OPT_WASMDEPS" --with-mpc="$OPT_WASMDEPS" \
     --disable-bootstrap --disable-shared --disable-threads --disable-nls --disable-libssp --disable-libada \
     --disable-libquadmath --disable-libgomp --disable-libvtv --disable-libstdcxx --disable-lto \
