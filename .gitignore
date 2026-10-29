@@ -1,0 +1,6 @@
+# Build work directories (produced at build time)
+build/
+public/
+
+# Logs
+*.log

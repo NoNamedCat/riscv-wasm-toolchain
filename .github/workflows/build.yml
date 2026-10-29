@@ -1,0 +1,55 @@
+name: build-wasm-toolchain
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential gawk flex bison xz-utils curl
+
+      - name: Install Emscripten
+        run: |
+          git clone --depth 1 https://github.com/emscripten-core/emsdk.git "$HOME/emsdk"
+          "$HOME/emsdk/emsdk" install latest
+          "$HOME/emsdk/emsdk" activate latest
+
+      - name: Build the WebAssembly toolchain
+        run: |
+          source "$HOME/emsdk/emsdk_env.sh"
+          ./build-riscv-wasm.sh
+
+      - name: Package artifacts
+        run: |
+          test -d public/wasm-toolchain
+          tar -czf riscv-wasm-toolchain.tar.gz -C public/wasm-toolchain .
+          sha256sum riscv-wasm-toolchain.tar.gz > riscv-wasm-toolchain.tar.gz.sha256
+          ls -lh riscv-wasm-toolchain.tar.gz
+
+      - name: Upload build artifact (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: riscv-wasm-toolchain
+          path: |
+            riscv-wasm-toolchain.tar.gz
+            riscv-wasm-toolchain.tar.gz.sha256
+
+      - name: Publish release
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            riscv-wasm-toolchain.tar.gz
+            riscv-wasm-toolchain.tar.gz.sha256
+          generate_release_notes: true
